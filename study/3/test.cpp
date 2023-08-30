@@ -2,45 +2,91 @@
 #include <iostream>
 using namespace std;
 
-class Complex
-{
+template<typename T>
+class MyVector{
 public:
-    double real;
-    double image;
-    Complex(double real, double image):
-        real(real), image(image)
-        {}
-    
-    Complex operator+(Complex& other){
-        return Complex(this->real + other.real, this->image + other.image);
+    typedef T value;
+    typedef T* iterator; // vector 的 iterator 本质就是一个指针
+    typedef T& reference;
+
+public:
+    MyVector(int len=0):
+        m_len(len), m_Data(nullptr), start(nullptr), pos(0)
+    {
+        if (len > 0){
+            // 创建一个数组
+            // 创建堆空间的内存在析构的时候需要释放掉
+            m_Data = new value[len];
+            start = m_Data;
+        }
+    }
+    ~MyVector(){
+        delete []m_Data;
     }
 
-    Complex operator*(Complex& other){
-        double a = this->real;
-        double b = this->image;
-        double c = other.real;
-        double d = other.image;
-        return Complex(a*c -b*d, b*c + a*d);
-    }
-    Complex operator[](Complex& other){
+    void push_back(const value& v){
+        if (m_len != pos){
+            *(start + pos) = v;
+            pos++;
+        }
+        else{
+            cout << "越界了" << endl;
+        }
         
     }
+    inline value pop_back(){
+        // --pos;
+        return *(start + --pos);
+    }
+    int size(){
+        return this->m_len;
+    }
+    iterator begin(){
+        return this->start;
+    }
+    iterator end(){
+        return this->start+pos;
+    }
+    // 传🚰回来才可以修改元素
+    value& operator[](int n){
+        if (n < pos){
+            return *(start+n);
+        }
+        else{
+            cout << "越界了" << endl;
+        }
+    }
+
+protected:
+    iterator m_Data;
+    iterator start;
+    int m_len;
+    int pos;
 
 };
 
-ostream& operator<< (ostream &cout, const Complex& other){
-    cout << other.real << "+" << other.image << "i";
+template<typename T>
+ostream& operator<<(ostream& cout, MyVector<T> vec){
+    for(int i = 0; i < vec.size(); i++){
+        cout << vec[i] << " ";
+    }
     return cout;
 }
 
 int main(int argc, char const *argv[])
 {
     /* code */
-    Complex c1(1.0f, 2.0f);
-    Complex c2(2.0f, 3.0f);
-    Complex c3 = c1 * c2;
-    // cout << "c1 = " << c1 << endl;
-    cout << "c3 = " << c3 << endl;
-    cout << "c3 = " << c3.real << ", " << c3.image << endl;
+    MyVector<int> vec(10);
+    for(int i=0; i<vec.size(); i++){
+        vec.push_back(i);
+    }
+    // for(MyVector<int>::iterator it = vec.begin(); it != vec.end(); it++){
+    //     cout << *it << endl;
+    // }
+    // cout << vec << endl;
+
+    cout << vec.pop_back() << endl;
+    cout << vec << endl;
+    
     return 0;
 }
